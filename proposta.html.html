@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automação · Portal de Protocolo de Compras</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2332;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #00ff9d;
+    --accent3: #ff6b35;
+    --warn: #ffc107;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --danger: #ff4d6d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(0,212,255,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,255,157,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 3rem 0 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .header-tag::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-sub {
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  /* METRICS ROW */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2.5rem 0;
+  }
+
+  .metric {
+    background: var(--surface);
+    padding: 1.5rem;
+    text-align: center;
+    transition: background 0.2s;
+  }
+
+  .metric:hover { background: var(--surface2); }
+
+  .metric-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .metric-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .metric-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    margin-top: 0.25rem;
+  }
+
+  /* SECTIONS */
+  section { padding: 3rem 0; border-bottom: 1px solid var(--border); }
+  section:last-child { border-bottom: none; }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .flow-step {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2rem;
+    align-items: start;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 139px;
+    top: 72px;
+    width: 2px;
+    height: calc(100% - 32px);
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    opacity: 0.3;
+  }
+
+  .flow-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: all 0.25s;
+    position: relative;
+    z-index: 1;
+  }
+
+  .flow-step:hover .flow-left {
+    border-color: var(--accent);
+    background: var(--surface2);
+    box-shadow: 0 0 20px rgba(0,212,255,0.08);
+  }
+
+  .flow-step.active .flow-left {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.06);
+  }
+
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .step-name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .step-desc {
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .flow-right {
+    padding: 1.5rem 0 1.5rem 0;
+    display: none;
+  }
+
+  .flow-step.active .flow-right { display: block; }
+
+  .flow-arrow {
+    position: absolute;
+    right: -2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent);
+    font-size: 1.2rem;
+    display: none;
+  }
+
+  .flow-step.active .flow-arrow { display: block; }
+
+  .detail-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+
+  .detail-card h4 {
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+  }
+
+  .detail-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .detail-card li {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .detail-card li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+
+  /* RULES TABLE */
+  .rules-grid {
+    display: grid;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .rules-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px;
+    gap: 1px;
+    background: var(--border);
+  }
+
+  .rules-header div {
+    background: var(--surface2);
+    padding: 0.75rem 1rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .rule-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px;
+    gap: 1px;
+    background: var(--border);
+    transition: all 0.2s;
+  }
+
+  .rule-row:hover { background: rgba(0,212,255,0.1); }
+
+  .rule-cell {
+    background: var(--surface);
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+  }
+
+  .rule-row:hover .rule-cell { background: transparent; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+  }
+
+  .badge.auto { background: rgba(0,255,157,0.15); color: var(--accent2); border: 1px solid rgba(0,255,157,0.3); }
+  .badge.alert { background: rgba(255,193,7,0.15); color: var(--warn); border: 1px solid rgba(255,193,7,0.3); }
+  .badge.block { background: rgba(255,77,109,0.15); color: var(--danger); border: 1px solid rgba(255,77,109,0.3); }
+  .badge.require { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+
+  /* ARCHITECTURE */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .arch-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .arch-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .arch-card.c1::before { background: var(--accent); }
+  .arch-card.c2::before { background: var(--accent2); }
+  .arch-card.c3::before { background: var(--accent3); }
+
+  .arch-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .arch-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .arch-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .arch-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+    font-family: 'JetBrains Mono', monospace;
+    margin-bottom: 1rem;
+  }
+
+  .tech-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .tech-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--muted);
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2), var(--accent3));
+    opacity: 0.4;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding: 0 0 2rem 2rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -5px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 10px var(--accent);
+  }
+
+  .timeline-item:nth-child(2)::before { background: var(--accent2); box-shadow: 0 0 10px var(--accent2); }
+  .timeline-item:nth-child(3)::before { background: var(--accent3); box-shadow: 0 0 10px var(--accent3); }
+  .timeline-item:nth-child(4)::before { background: var(--warn); box-shadow: 0 0 10px var(--warn); }
+
+  .timeline-phase {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent);
+    margin-bottom: 0.25rem;
+  }
+
+  .timeline-item:nth-child(2) .timeline-phase { color: var(--accent2); }
+  .timeline-item:nth-child(3) .timeline-phase { color: var(--accent3); }
+  .timeline-item:nth-child(4) .timeline-phase { color: var(--warn); }
+
+  .timeline-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .timeline-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ROI */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .roi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.75rem;
+  }
+
+  .roi-card.highlight {
+    background: rgba(0,255,157,0.04);
+    border-color: rgba(0,255,157,0.3);
+  }
+
+  .roi-card h3 {
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .roi-number {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .roi-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* TABS for flow detail */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+  .tab {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { border-color: var(--accent); color: var(--text); }
+  .tab.active { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
+
+  /* AI SECTION */
+  .ai-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .ai-feat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: all 0.2s;
+  }
+
+  .ai-feat:hover {
+    border-color: rgba(0,212,255,0.4);
+    background: var(--surface2);
+  }
+
+  .ai-feat-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .ai-feat-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.4rem; }
+  .ai-feat-desc { font-size: 0.75rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; line-height: 1.5; }
+
+  /* Footer */
+  footer {
+    padding: 2rem 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  @media (max-width: 768px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .flow-step { grid-template-columns: 1fr; }
+    .flow-step::after { display: none; }
+    .arch-grid { grid-template-columns: 1fr; }
+    .ai-features { grid-template-columns: 1fr; }
+    .roi-grid { grid-template-columns: 1fr; }
+    .rules-header, .rule-row { grid-template-columns: 1fr 1fr; }
+    .rules-header div:last-child, .rule-cell:last-child { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-tag">Proposta de Automação · Célula de Pagamento</div>
+    <h1>Portal Inteligente de<br><span>Protocolo de Compras</span></h1>
+    <p class="header-sub">Integração SAP · Motor de Regras · IA Documental · ~400 protocolos/mês</p>
+  </header>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-value" style="color:#ff4d6d">4</div>
+      <div class="metric-label">Pessoas hoje</div>
+      <div class="metric-delta" style="color:#ff4d6d">Custo operacional alto</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value" style="color:#ffc107">400</div>
+      <div class="metric-label">Protocolos / mês</div>
+      <div class="metric-delta" style="color:#ffc107">Processamento manual</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value" style="color:#00ff9d">~85%</div>
+      <div class="metric-label">Automação estimada</div>
+      <div class="metric-delta" style="color:#00ff9d">↑ com IA documental</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value" style="color:#00d4ff">1</div>
+      <div class="metric-label">Supervisor restante</div>
+      <div class="metric-delta" style="color:#00d4ff">Exceções & auditoria</div>
+    </div>
+  </div>
+
+  <!-- FLUXO -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">01</span>
+      <h2>Fluxo Automatizado de Validação</h2>
+    </div>
+    <p style="font-size:0.82rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:1.5rem;">
+      Clique em cada etapa para ver os detalhes da automação →
+    </p>
+
+    <div class="flow" id="flow">
+
+      <div class="flow-step" onclick="toggleStep(0)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(0,212,255,0.15)">📋</div>
+          <div>
+            <div class="step-name">Abertura do Protocolo</div>
+            <div class="step-desc">Usuário preenche formulário inteligente</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>O que acontece aqui</h4>
+            <ul>
+              <li>Formulário web com campos dinâmicos (não planilha ou e-mail)</li>
+              <li>Upload de NF, requisição e contrato em PDF</li>
+              <li>IA já extrai: item, fornecedor, valor e número de contrato automaticamente</li>
+              <li>Usuário apenas confirma ou corrige — não digita do zero</li>
+              <li>Integrado ao login corporativo (SSO/AD)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step" onclick="toggleStep(1)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(0,255,157,0.15)">🔍</div>
+          <div>
+            <div class="step-name">Validação do Item</div>
+            <div class="step-desc">Consulta automática ao cadastro SAP</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>Lógica de decisão</h4>
+            <ul>
+              <li>API SAP verifica se o item/material está cadastrado (MARA/MARC)</li>
+              <li>Item cadastrado → segue para próxima etapa</li>
+              <li>Item não cadastrado → abre fluxo de cadastro automaticamente (MM01)</li>
+              <li>Notifica comprador responsável por e-mail/Teams</li>
+              <li>Protocolo fica em "aguardando cadastro" até resolução</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step" onclick="toggleStep(2)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(255,107,53,0.15)">📄</div>
+          <div>
+            <div class="step-name">Validação de Contrato</div>
+            <div class="step-desc">Verificação de vigência e cobertura</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>Lógica de decisão</h4>
+            <ul>
+              <li>Consulta contratos ativos no SAP (ME33K / tabela EKKO)</li>
+              <li>Verifica validade, valor disponível e cobertura do item</li>
+              <li>Contrato OK → segue</li>
+              <li>Sem contrato → alerta comprador para negociação ou emergencial</li>
+              <li>Contrato vencendo em 30 dias → alerta preventivo ao gestor</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step" onclick="toggleStep(3)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(255,193,7,0.15)">🏭</div>
+          <div>
+            <div class="step-name">Validação do Fornecedor</div>
+            <div class="step-desc">Status, bloqueio e conformidade</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>Lógica de decisão</h4>
+            <ul>
+              <li>Consulta cadastro de fornecedor no SAP (LFA1/LFB1)</li>
+              <li>Verifica bloqueios de pagamento, compra ou qualidade</li>
+              <li>Pode integrar com CNPJ Receita Federal e listas de restrição</li>
+              <li>Fornecedor bloqueado → protocolo impedido automaticamente, notificação ao gestor</li>
+              <li>Fornecedor com pendências → abre sub-fluxo de regularização</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step" onclick="toggleStep(4)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(0,212,255,0.1)">⚙️</div>
+          <div>
+            <div class="step-name">Validação de Parametrização</div>
+            <div class="step-desc">Centro de custo, conta contábil, aprovadores</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>Lógica de decisão</h4>
+            <ul>
+              <li>Verifica se centro de custo e conta contábil estão parametrizados</li>
+              <li>Valida aprovadores por valor e categoria (matriz de alçadas)</li>
+              <li>Parâmetro faltando → sistema exige preenchimento com sugestão automática</li>
+              <li>Conflito de classificação fiscal → exige revisão antes de prosseguir</li>
+              <li>Tudo OK → dispara aprovação eletrônica automática</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-step" onclick="toggleStep(5)">
+        <div class="flow-left">
+          <div class="step-icon" style="background:rgba(0,255,157,0.15)">✅</div>
+          <div>
+            <div class="step-name">Envio para o SAP</div>
+            <div class="step-desc">Criação automática do pedido (ME21N)</div>
+          </div>
+        </div>
+        <div class="flow-right">
+          <div class="detail-card">
+            <h4>O que acontece aqui</h4>
+            <ul>
+              <li>Todas as validações OK → sistema cria o pedido via SAP BAPI/RFC</li>
+              <li>Número do pedido retorna para o portal e é enviado ao solicitante</li>
+              <li>Documentos (NF, requisição) são anexados automaticamente no SAP DMS</li>
+              <li>Protocolo é encerrado e arquivado com log completo de auditoria</li>
+              <li>Dashboard atualizado em tempo real</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MOTOR DE REGRAS -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">02</span>
+      <h2>Motor de Regras</h2>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rules-header">
+        <div>Condição detectada</div>
+        <div>Ação automática</div>
+        <div>Tipo</div>
+      </div>
+
+      <div class="rule-row">
+        <div class="rule-cell">Item não cadastrado no SAP</div>
+        <div class="rule-cell">Abre fluxo de cadastro automático (MM01)</div>
+        <div class="rule-cell"><span class="badge auto">⚡ Auto</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Item sem contrato vigente</div>
+        <div class="rule-cell">Alerta comprador por e-mail/Teams</div>
+        <div class="rule-cell"><span class="badge alert">⚠ Alerta</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Fornecedor bloqueado (qualquer motivo)</div>
+        <div class="rule-cell">Impede protocolo + notifica gestor</div>
+        <div class="rule-cell"><span class="badge block">🚫 Bloqueio</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Classificação fiscal ausente</div>
+        <div class="rule-cell">Exige preenchimento obrigatório</div>
+        <div class="rule-cell"><span class="badge require">📌 Obrigatório</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Valor acima da alçada do aprovador</div>
+        <div class="rule-cell">Escala automaticamente para próximo nível</div>
+        <div class="rule-cell"><span class="badge auto">⚡ Auto</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Contrato vencendo em &lt; 30 dias</div>
+        <div class="rule-cell">Alerta preventivo ao gestor de contratos</div>
+        <div class="rule-cell"><span class="badge alert">⚠ Alerta</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">CNPJ com pendência na Receita Federal</div>
+        <div class="rule-cell">Bloqueia e abre sub-fluxo de regularização</div>
+        <div class="rule-cell"><span class="badge block">🚫 Bloqueio</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Centro de custo não parametrizado</div>
+        <div class="rule-cell">Sugere CC similar, exige confirmação</div>
+        <div class="rule-cell"><span class="badge require">📌 Obrigatório</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Duplicidade de protocolo detectada</div>
+        <div class="rule-cell">Alerta usuário com link do protocolo original</div>
+        <div class="rule-cell"><span class="badge alert">⚠ Alerta</span></div>
+      </div>
+      <div class="rule-row">
+        <div class="rule-cell">Todas as validações OK</div>
+        <div class="rule-cell">Cria pedido SAP automaticamente (BAPI)</div>
+        <div class="rule-cell"><span class="badge auto">⚡ Auto</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IA -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">03</span>
+      <h2>Camada de IA Documental</h2>
+    </div>
+    <p style="font-size:0.82rem; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:0.5rem;">
+      Reduz a intervenção humana ao mínimo — usuário apenas confirma, não digita.
+    </p>
+
+    <div class="ai-features">
+      <div class="ai-feat">
+        <div class="ai-feat-icon">📄</div>
+        <div class="ai-feat-title">Leitura de Nota Fiscal</div>
+        <div class="ai-feat-desc">OCR + IA extrai CNPJ, itens, valores, CFOP e chave de acesso automaticamente do PDF da NF-e</div>
+      </div>
+      <div class="ai-feat">
+        <div class="ai-feat-icon">📑</div>
+        <div class="ai-feat-title">Leitura de Requisição</div>
+        <div class="ai-feat-desc">Identifica centro de custo, solicitante, descrição do item e urgência a partir do documento</div>
+      </div>
+      <div class="ai-feat">
+        <div class="ai-feat-icon">📋</div>
+        <div class="ai-feat-title">Leitura de Contrato</div>
+        <div class="ai-feat-desc">Extrai número do contrato, vigência, itens cobertos e valor máximo para cruzar com o pedido</div>
+      </div>
+      <div class="ai-feat">
+        <div class="ai-feat-icon">🔗</div>
+        <div class="ai-feat-title">Match Automático</div>
+        <div class="ai-feat-desc">Cruza item da NF com item cadastrado no SAP por similaridade semântica, reduzindo erros de digitação</div>
+      </div>
+      <div class="ai-feat">
+        <div class="ai-feat-icon">🚨</div>
+        <div class="ai-feat-title">Detecção de Anomalias</div>
+        <div class="ai-feat-desc">Identifica valores atípicos, fornecedores suspeitos e divergências entre NF e pedido</div>
+      </div>
+      <div class="ai-feat">
+        <div class="ai-feat-icon">📊</div>
+        <div class="ai-feat-title">Relatórios Automáticos</div>
+        <div class="ai-feat-desc">Gera resumo mensal de protocolos, SLAs, gargalos e economia gerada pela automação</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARQUITETURA TÉCNICA -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">04</span>
+      <h2>Arquitetura Técnica Sugerida</h2>
+    </div>
+
+    <div class="arch-grid">
+      <div class="arch-card c1">
+        <div class="arch-icon">🖥️</div>
+        <div class="arch-title">Portal Web (Frontend)</div>
+        <div class="arch-desc">Interface do usuário para abertura e acompanhamento de protocolos. Mobile-friendly.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">React / Vue</span>
+          <span class="tech-tag">Power Apps</span>
+          <span class="tech-tag">SharePoint</span>
+          <span class="tech-tag">SSO / Azure AD</span>
+        </div>
+      </div>
+      <div class="arch-card c2">
+        <div class="arch-icon">⚙️</div>
+        <div class="arch-title">Motor de Regras (Backend)</div>
+        <div class="arch-desc">Orquestra validações, aplica regras de negócio e decide o próximo passo do fluxo.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">Node.js / Python</span>
+          <span class="tech-tag">Power Automate</span>
+          <span class="tech-tag">Apache Airflow</span>
+          <span class="tech-tag">n8n</span>
+        </div>
+      </div>
+      <div class="arch-card c3">
+        <div class="arch-icon">🔌</div>
+        <div class="arch-title">Integração SAP</div>
+        <div class="arch-desc">Comunicação bidirecional com SAP via APIs oficiais e RFC para leitura e criação de dados.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">SAP BAPI</span>
+          <span class="tech-tag">SAP RFC</span>
+          <span class="tech-tag">SAP OData</span>
+          <span class="tech-tag">SAP PI/PO</span>
+        </div>
+      </div>
+      <div class="arch-card c1">
+        <div class="arch-icon">🤖</div>
+        <div class="arch-title">IA Documental</div>
+        <div class="arch-desc">Leitura e extração automática de informações de NF, requisições e contratos em PDF.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">Azure Document AI</span>
+          <span class="tech-tag">AWS Textract</span>
+          <span class="tech-tag">Claude API</span>
+          <span class="tech-tag">Google DocAI</span>
+        </div>
+      </div>
+      <div class="arch-card c2">
+        <div class="arch-icon">🗄️</div>
+        <div class="arch-title">Banco de Dados</div>
+        <div class="arch-desc">Armazena protocolos, logs de auditoria, histórico de regras e métricas operacionais.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">PostgreSQL</span>
+          <span class="tech-tag">SQL Server</span>
+          <span class="tech-tag">SAP HANA</span>
+          <span class="tech-tag">Redis (cache)</span>
+        </div>
+      </div>
+      <div class="arch-card c3">
+        <div class="arch-icon">📊</div>
+        <div class="arch-title">Dashboard & Alertas</div>
+        <div class="arch-desc">Painel de controle em tempo real, notificações e relatórios automáticos para gestão.</div>
+        <div class="tech-tags">
+          <span class="tech-tag">Power BI</span>
+          <span class="tech-tag">Grafana</span>
+          <span class="tech-tag">Teams / Slack</span>
+          <span class="tech-tag">E-mail / SMS</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">05</span>
+      <h2>Roadmap de Implementação</h2>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-phase">Fase 1 · Semanas 1–4</div>
+        <div class="timeline-title">Mapeamento e Fundação</div>
+        <div class="timeline-desc">Levantar todas as regras de negócio com a equipe atual. Mapear as APIs SAP disponíveis. Definir os campos obrigatórios do formulário. Escolher stack tecnológico e montar o ambiente de desenvolvimento.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Fase 2 · Semanas 5–10</div>
+        <div class="timeline-title">Portal + Motor de Regras (MVP)</div>
+        <div class="timeline-desc">Desenvolver o portal web com formulário inteligente. Implementar o motor de regras com as 10 principais validações. Integrar com SAP para consulta de itens, fornecedores e contratos. Piloto com 10–20% dos protocolos em paralelo com o processo atual.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Fase 3 · Semanas 11–16</div>
+        <div class="timeline-title">Criação Automática + IA Documental</div>
+        <div class="timeline-desc">Implementar criação automática de pedido no SAP (ME21N via BAPI). Adicionar leitura automática de NF e requisição com IA. Configurar alertas e notificações automáticas. Dashboard de acompanhamento em tempo real.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-phase">Fase 4 · Semanas 17–20</div>
+        <div class="timeline-title">Go-live, Ajustes e Transição de Equipe</div>
+        <div class="timeline-desc">Migração completa para o novo sistema. Retreinamento da equipe (foco em exceções e auditoria). Ajuste fino das regras baseado nos primeiros dados reais. Plano de realocação ou transição das 4 pessoas da célula.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROI -->
+  <section>
+    <div class="section-title">
+      <span class="section-num">06</span>
+      <h2>Impacto Esperado</h2>
+    </div>
+
+    <div class="roi-grid">
+      <div class="roi-card">
+        <h3>Redução de equipe</h3>
+        <div class="roi-number" style="color:var(--danger)">4 → 1</div>
+        <div class="roi-note">1 supervisor para exceções e auditoria. As outras 3 pessoas podem ser realocadas para atividades estratégicas.</div>
+      </div>
+      <div class="roi-card highlight">
+        <h3>Protocolos automatizados</h3>
+        <div class="roi-number" style="color:var(--accent2)">~85%</div>
+        <div class="roi-note">Estimativa conservadora. Os 15% restantes são exceções (sem cadastro, sem contrato, bloqueios) que ainda precisam de humano.</div>
+      </div>
+      <div class="roi-card">
+        <h3>Redução de erros</h3>
+        <div class="roi-number" style="color:var(--accent)">~90%</div>
+        <div class="roi-note">Validações automáticas eliminam erros de digitação, campos faltando e pedidos enviados sem conformidade.</div>
+      </div>
+      <div class="roi-card">
+        <h3>Tempo médio por protocolo</h3>
+        <div class="roi-number" style="color:var(--warn)">~3 min</div>
+        <div class="roi-note">Antes: 15–30 min por protocolo com verificações manuais. Depois: fluxo automático em segundos, 3 min apenas para exceções.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="container">
+    Proposta de Automação · Portal de Protocolo de Compras · Integração SAP
+  </div>
+</footer>
+
+<script>
+  const steps = document.querySelectorAll('.flow-step');
+
+  function toggleStep(index) {
+    steps.forEach((s, i) => {
+      if (i === index) {
+        s.classList.toggle('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+  }
+
+  // Auto-open first step
+  steps[0].classList.add('active');
+
+  // Animate metrics on load
+  const metricValues = document.querySelectorAll('.metric-value');
+  metricValues.forEach(m => {
+    m.style.opacity = '0';
+    m.style.transform = 'translateY(10px)';
+    m.style.transition = 'all 0.5s ease';
+  });
+
+  setTimeout(() => {
+    metricValues.forEach((m, i) => {
+      setTimeout(() => {
+        m.style.opacity = '1';
+        m.style.transform = 'translateY(0)';
+      }, i * 100);
+    });
+  }, 200);
+</script>
+
+</body>
+</html>
